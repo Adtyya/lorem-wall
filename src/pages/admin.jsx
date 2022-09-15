@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import moment from "moment/moment";
 import { FileUploader } from "react-drag-drop-files";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const fileTypes = ["JPG", "PNG", "JPEG", "GIF"];
 
@@ -41,8 +43,6 @@ export default function AdminPage() {
     });
   };
 
-  console.log(fileUrl);
-
   const handleChange = (event) => {
     console.log(event);
     setImage(event);
@@ -66,10 +66,48 @@ export default function AdminPage() {
     console.log(file);
   };
 
+  const handleTypeError = (error) => {
+    if (error) {
+      toast.error("Please insert only image file!", {
+        position: "top-right",
+        autoClose: 3000,
+        closeOnClick: true,
+      });
+    }
+  };
+
+  const deleteSelectedImage = () => {
+    setImage(null);
+    setFileUrl(null);
+  };
+
+  useEffect(() => {
+    let mounted = false;
+    if (user && !mounted) {
+      toast.info(`Welcome back ${user.displayName}`, {
+        position: "top-right",
+        autoClose: 3000,
+        closeOnClick: true,
+      });
+    }
+    return () => {
+      mounted = true;
+    };
+  }, [user]);
+
+  useEffect(() => {
+    const checkAuth = () => {
+      if (!isLogin.user) {
+        navigate("/login");
+      }
+    };
+    checkAuth();
+  }, [isLogin]);
+
   return (
     <Layout>
       {user && (
-        <>
+        <div>
           <div className="py-12">
             <div className="flex justify-center w-full">
               <img
@@ -89,24 +127,86 @@ export default function AdminPage() {
                 Logout
               </button>
             </div>
-            <div className="w-full flex flex-col items-center space-y-3">
-              <h1 className="text-lg font-semibold">Share your best image</h1>
-              {image && <img src={fileUrl} alt="preview" />}
-              <div>
-                <FileUploader
-                  handleChange={handleChange}
-                  name="image"
-                  types={fileTypes}
-                  multiple={false}
-                  children={dragDrop}
-                  maxSize={1}
-                  onSizeError={handleError}
-                />
+            <div className="bg-white shadow-md rounded m-3 p-5">
+              <form onSubmit={handleSubmit}>
+                <div className="w-full flex flex-col items-center space-y-2">
+                  <h1 className="text-lg font-semibold text-blue-800">
+                    Share your best image 🖼️
+                  </h1>
+
+                  <div className="w-[300px]">
+                    <label
+                      htmlFor="title"
+                      className="block text-black text-sm font-bold mb-2"
+                    >
+                      Image name
+                    </label>
+                    <input
+                      type="text"
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-md"
+                    />
+                  </div>
+                  <div>
+                    {image && (
+                      <div className="w-full relative">
+                        <img
+                          src={fileUrl}
+                          alt="preview"
+                          className="w-full max-w-full max-h-[320px] object-cover brightness-90"
+                        />
+                        <span
+                          className="absolute top-3 right-3 cursor-pointer"
+                          onClick={deleteSelectedImage}
+                        >
+                          <button
+                            type="button"
+                            className="text-white bg-red-500 px-4 py-1 rounded shadow"
+                          >
+                            Delete
+                          </button>
+                        </span>
+                      </div>
+                    )}
+                    {image ? (
+                      <p className="text-sm text-center font-semibold">
+                        only one image can be uploaded
+                      </p>
+                    ) : (
+                      <div className="w-[300px]">
+                        <label
+                          htmlFor="title"
+                          className="block text-black text-sm font-bold mb-2"
+                        >
+                          Select your image
+                        </label>
+                        <FileUploader
+                          handleChange={handleChange}
+                          name="image"
+                          types={fileTypes}
+                          multiple={false}
+                          children={dragDrop}
+                          maxSize={2}
+                          onSizeError={handleError}
+                          onTypeError={handleTypeError}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </form>
+              <div className="m-3 py-12">
+                <h3 className="text-md text-black">
+                  Latest image by -{" "}
+                  <span className="font-semibold text-blue-800">
+                    {user?.displayName}
+                  </span>
+                </h3>
               </div>
             </div>
           </div>
-        </>
+        </div>
       )}
+      <ToastContainer />
     </Layout>
   );
 }
