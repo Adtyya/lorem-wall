@@ -44,7 +44,6 @@ export default function AdminPage() {
   };
 
   const handleChange = (event) => {
-    console.log(event);
     setImage(event);
     const preview = URL.createObjectURL(event);
     setFileUrl(preview);
@@ -130,9 +129,7 @@ export default function AdminPage() {
             <div className="bg-white shadow-md rounded m-3 p-5">
               <form onSubmit={handleSubmit}>
                 <div className="w-full flex flex-col items-center space-y-2">
-                  <h1 className="text-lg font-semibold text-blue-800">
-                    Share your best image 🖼️
-                  </h1>
+                  <h1 className="text-lg font-semibold">Post new image 🖼️</h1>
 
                   <div className="w-[300px]">
                     <label
